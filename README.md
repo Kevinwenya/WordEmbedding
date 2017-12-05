@@ -1,2 +1,0 @@
-# WordEmbedding
-词向量表示，介绍词向量表示方法，以及采用gensim的word2vec模型训练词向量
