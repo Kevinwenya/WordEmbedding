@@ -1,14 +1,14 @@
-#自然语言处理 - 词向量 
-##1、概述
+# 自然语言处理 - 词向量 
+## 1、概述
 若要通过计算机对文本等自然语言进行处理，通常首先需要将这些文本数字 化，也就是用向量来表示文本里的每个词语。
 一种最简单的词向量方式是 one-hot representation，就是用一个很长的 向量来表示一个词，向量的长度为词典的大小，向量的分量只有一个 1，其他 全为 0，1 的位置对应该词在词典中的位置。
 另一种就是 Distributed Representation，这种表示，最早是 Hinton 于 1986 年提出的，可以克服 one-hot representation 的缺点。其基本想法是: 通过训练将某种语言中的每一个词映射成一个固定长度的短向量(当然这里的 “短”是相对于 one-hot representation 的“长”而言的)，将所有这些向 量放在一起形成一个词向量空间，而每一向量则为该空间中的一个点，在这个 空间上引入“距离”，则可以根据词之间的距离来判断它们之间的(词法、语 义上的)相似性了。
-####举几个通俗的例子:
+#### 举几个通俗的例子:
 1、现代人看到苹果，华为这两个词，第一眼的反应多数都是手机。但是如果 拿给古人看，古人一定想不到手机。为什么呢，因为古人没有相关知识，只 能从字面上去理解这两个词，即<苹,果>，<华,为>。拿给计算机，计算机看 到的也是字面上的意思，这两个字串是八竿子打不着(要是给计算机华为和 华山，它倒是能发现这俩词有点像)。那怎么才能让计算机把这俩词关系起 来呢，这就是统计学习干的事了，因为我们有很多资源可以利用，计算机可 以利用一些算法从这些资源中学习到词之间的关系，就像人类一样，天天听 别人说这手机是苹果，那手机是华为，久了就知道这俩东西都是手机了。但 是苹果在有些语境里也未必是手机。
 
 2、问你这样一个问题:如果你大脑有很多记忆单元，让你记住一款白色奥迪 Q7 运动型轿车，你会用几个记忆单元?你也许会用一个记忆单元，因为这样最节省你的大脑。那么我们再让你记住一款小型灰色雷克萨斯，你会怎么办?显然你会用另外一个记忆单元来记住它。那么如果让你记住所有的车，你要耗费的记忆单元就不再是那么少了，这种表示方法叫做稀疏表达(典型代表就是 one-hot)。这时你可能会换另外一种思路:我们用几个记忆单元来分别识别大小、颜色、品牌等基础信息，这样通过这几个记忆单元的输出，我们就可以表示出所有的车型了。这种表示方法叫做分布式表达，词向量就是一种用 distributed representation 表示的向量
 
-One-hot Representation Distributed representation
+###### One-hot Representation             Distributed representation
 
 ![](https://github.com/Kevinwenya/WordEmbedding/blob/master/vector.png)
 
@@ -21,10 +21,10 @@ Distributed representation 最大的贡献就是让相关或者相似的词，�
 ###### 男人:[-1.62051833 -1.08284032 -0.95101804......1.70183563 - 0.24874304 -0.6090101], 300 维词向量表示。
 *如何得到上述结果的尼?整个过程是怎样的尼?需要掌握哪些知识尼?* 自然语言处理最基本也是最重要的就是语料知识，需要有一个强大的语料库。然后我们对该语料库进行简单的预处理(去除标点符号、繁简转换、去除文章 结构标识等一些基本操作、分词等一些基本操作)。然后再根据需要，进行相关的处理。这里我们是直接基于分词后的语料库，通过 python 的 gensim 库训练了 Word2Vec 模型([gensim_word2vec](http://radimrehurek.com/gensim/models/word2vec))， 当然，也可以基于分词后的语料库，使用 google 的 Word2Vec 工具 ([google_word2vec](https://code.google.com/archive/p/word2vec/))来训练语料。之后，就是根据训练好的 word2vec 模型，使用它来做相关的计算了。
 
-##2、语料库获取
+## 2、语料库获取
 中文语料库中，质量比较高且比较容易获取的语料资源应该就是维基百科的语料了，而且维基的语料每个月都会重新打包更新一次。官方提供了一个非常好的数据源，维基百科语料库的官方链接为:[wikimedia](https://dumps.wikimedia.org/)，从这里我们可以下载多种语言多种格式的百科数据。比如中文维基百科数据数据源为: [zhwiki](https://dumps.wikimedia.org/zhwiki/)， 这里我们下载了最新的包含标题和正文的版本数据:[zhwiki_latest](https://dumps.wikimedia.org/zhwiki/latest/),zhwiki-latest-pages-artices.xml.bz2 , 中文维基百科的数据并不大，1.4G左右。
 [enwiki_latest](https://dumps.wikimedia.org/enwiki/latest/)，enwiki-latest-pages-artices.xml.bz2 ，英文维基百科的数据相对中文的大很多，13.2G左右。由此也可以看出维基百科的缺点，最主要的就是数量较少，相比国内的百度百科、互动百科等，数据量要少一个数量级。当然也可以采用其他的语料资源，比如搜狗的数据资源:[sogou_pingce](http://www.sogou.com/labs/resource/list_pingce.php)，甚至可以使用自己爬取 的语料数据。
-##3、语料预处理
+## 3、语料预处理
 因为从维基百科上下载的语料数据是 xml 压缩文件格式的，所以，需要进 行一些处理，使其成为较为纯净的文本格式数据。通常使用维基百科语料测试 其他任务之前，我们需要如下几步处理:
 我们需要将 xml 格式的 wiki 数据转换为 text 格式，也就是对 wiki 的数据 内容进行抽取，这个抽取内容的过程可以通过两种方式来实现。
 其一，使用 Wikipedia Extractor ([wikipedia_extractor](http://medialab.di.unipi.it/wiki/Wikipedia_Extractor));  https://github.com/attardi/wikiextractor
@@ -69,7 +69,7 @@ def tradition2simple(line):
 ![](https://github.com/Kevinwenya/WordEmbedding/blob/master/cut_words.png)
 
   经过上述的这些处理过程，我们基本得到了可以用于训练词向量的教卫纯净的语料。其二，使用 gensim 的 wikicorpus 库，可以参考下面的链接: [wikicorpus](http://radimrehurek.com/gensim/corpora/wikicorpus.html)
-##4、训练词向量模型
+## 4、训练词向量模型
 这里主要使用的是 python 版本的 gensim，通过 gensim 提供的 API 可以相 对比较容易的进行词向量训练。
 #####          [gensim_word2vec](http://radimrehurek.com/gensim/models/word2vec.html)
 训练时参考 gensim 下 word2vec 的 api 介绍，
@@ -92,7 +92,7 @@ binary=True)
 notice:首先将输入的文件转为 gensim 内部的 LineSentence 对象，其次, gensim.models.Word2Vec 初始化一个 Word2Vec 模型，size 参数表示训练的向量的数;min_count 表示忽略那些出现次数小于这个数值的词语，认为他们 是没有意义的词语，一般的取值范围为(0，100);sg 表示采用何种算法进行 训练，取 0 时表示采用 CBOW 模型，取 1 表示采用 skip-gram 模型;workers 表示开多少个进程进行训练，采用多进程训练可以加快训练过程，这里开的进程 数与 CPU 的核数相等。最后将训练后的得到的词向量存储在文件中，存储的格 式可以是 gensim 提供的默认格式(save 方法)，也可以与原始 c 版本 word2vec 的 vector 相同的格式(save_word2vec_format 方法)，加载时分别采用 load 方 法和 load_word2vec_format 方法即可，以上这些在 gensim word2vec API 中都 有介绍。
 
   如果我们已经基于现有的语料库训练了一个词向量模型，但是当这个语料库要扩充的时候，如何训练新增的这些文章，从而更新我们的模型尼?我们可以先加载我们先前已经训练好的词向量模型，然后再添加新的文章进行训练。同样新增的文章的格式也要满足每行一篇文章，每篇文章的词语通过空格 分开的格式。这里需要注意的是加载的模型只能 是通过 model.save()存储的模型，从 model.save_word2vec_format()恢复过来的模型只能用于查询。
-##5、使用词向量模型
+## 5、使用词向量模型
 通过 gensim 加载训练好的词向量模型,可以根据 gensim 提供的 API,进行其他的相关计算，现举几个例子如下: 
 
 1、得到“数学”这个词的 300 维向量表示:
@@ -130,11 +130,11 @@ model = gensim.models.Word2Vec.load_word2vec_format("wiki.text.vector", binary=F
 
 当然关于词向量，还有很多其他有趣的性质，这个可以通过查看API实现。
 
-##附:
-#####(1)利用 Google 开源的 word2vec 工具
+## 附:
+##### (1)利用 Google 开源的 word2vec 工具
 首先我们从网上下载一个源码，因为 google 官方的 svn 库已经不在了，所以只能从 csdn 下了，但是因为还要花积分才能下载，所以我干脆分享到了我的 git 上 (https://github.com/warmheartli/ChatBotCourse/tree/master/word2vec)，大家可以直接下载下来后直接执行 make 编译(如果是 mac 系统要把代码里所有的#include <malloc.h> 替换成#include <sys/malloc.h>)
 编译后生成 word2vec、word2phrase、word-analogy、distance、compute-accuracy 几个二进制文件我们先用 word2vec 来训练首先我们要有训练语料，其实就是已经切好词(空格分隔)的文本，比如我们已经有了这个文 本文件叫做 train.txt，内容是"人工 智能 一直 以来 是 人类 的 梦想 造 一台 可以 为 你 做 一切 事情 并且 有 情感 的 机器 人"并且重复100遍会生成一个 vectors.bin 文件，这个就是训练好的词向量的二进制文件，利用这个文件我们可以求近义词了
-#####(2)利用tensorflow深度学习框架生成词向量(wordembedding)
+##### (2)利用tensorflow深度学习框架生成词向量(wordembedding)
 
 ```
  https://github.com/tensorflow/models/blob/master/tutorials/embedding/word2vec.py
