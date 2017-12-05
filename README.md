@@ -8,7 +8,7 @@
 
 2、问你这样一个问题:如果你大脑有很多记忆单元，让你记住一款白色奥迪 Q7 运动型轿车，你会用几个记忆单元?你也许会用一个记忆单元，因为这样最节省你的大脑。那么我们再让你记住一款小型灰色雷克萨斯，你会怎么办?显然你会用另外一个记忆单元来记住它。那么如果让你记住所有的车，你要耗费的记忆单元就不再是那么少了，这种表示方法叫做稀疏表达(典型代表就是 one-hot)。这时你可能会换另外一种思路:我们用几个记忆单元来分别识别大小、颜色、品牌等基础信息，这样通过这几个记忆单元的输出，我们就可以表示出所有的车型了。这种表示方法叫做分布式表达，词向量就是一种用 distributed representation 表示的向量
 
-###### One-hot Representation             Distributed representation
+### One-hot Representation             Distributed representation
 
 ![](https://github.com/Kevinwenya/WordEmbedding/blob/master/vector.png)
 
